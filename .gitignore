@@ -1,0 +1,8 @@
+.dub/
+.idea/
+tmp/
+*.so
+tests
+expr_repl
+
+
