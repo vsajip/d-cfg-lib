@@ -1830,6 +1830,31 @@ Variant[] asList(Variant v) {
     return v.peek!(ListWrapper) ? v.get!(ListWrapper).asList() : v.get!(Variant[]);
 }
 
+string stringFor(Variant v) {
+    string result;
+
+    if (isList(v)) {
+        string[] parts = [];
+
+        foreach (item; v.get!(Variant[])) {
+            parts ~= stringFor(item);
+        }
+        result = format!"[%s]"(parts.join(", "));
+    }
+    else if (isDict(v)) {
+        string[] parts = [];
+
+        foreach (k, v; v.get!(Variant[string])) {
+            parts ~= format!"%s: %s"(k, stringFor(v));
+        }
+        result = format!"{%s}"(parts.join(", "));
+    }
+    else {
+        result = format!"%s"(v);
+    }
+    return result;
+}
+
 class Evaluator {
     private Config config;
     private bool[UnaryNode] refsSeen;
@@ -2529,8 +2554,9 @@ Variant unwrap(Variant o) {
 
 private static Regex!char ISO_DATETIME_PATTERN = regex(r"^(\d{4})-(\d{2})-(\d{2})(([ T])(((\d{2}):(\d{2}):(\d{2}))(\.\d{1,6})?(([+-])(\d{2}):(\d{2})(:(\d{2})(\.\d{1,6})?)?)?))?$");
 private static Regex!char ENV_VALUE_PATTERN = regex(r"^\$(\w+)(\|(.*))?$");
+private static Regex!char INTERPOLATION_PATTERN = regex(r"\$\{([^}]+)\}");
 
-Variant defaultStringConverter(string s) {
+Variant defaultStringConverter(string s, Config cfg) {
     Variant result = s;
     auto c = matchFirst(s, ISO_DATETIME_PATTERN);
 
@@ -2583,6 +2609,41 @@ Variant defaultStringConverter(string s) {
 
             result = environment.get(varName, dv);
         }
+        else {
+            c = matchFirst(s, INTERPOLATION_PATTERN);
+            if (!c.empty) {
+                auto matches = matchAll(s, INTERPOLATION_PATTERN);
+                auto failed = false;
+                ulong cp = 0;
+                string[] parts = [];
+
+                foreach (match; matches) {
+                    auto sp = match.pre.length;
+                    auto ep = sp + match.hit.length;
+                    auto path = match[1];
+
+                    if (cp < sp) {
+                        parts ~= s[cp .. sp];
+                    }
+                    try {
+                        auto v = cfg[path];
+
+                        parts ~= stringFor(v);
+                    }
+                    catch (Exception e) {
+                        failed = true;
+                        break;
+                    }
+                    cp = ep;
+                }
+                if (!failed) {
+                    if (cp < s.length) {
+                        parts ~= s[cp .. s.length];
+                    }
+                    result = parts.join("");
+                }
+            }
+        }
     }
     return result;
 }
@@ -2599,7 +2660,7 @@ class Config {
     private DictWrapper data;
     private bool _cached;
     private Evaluator evaluator;
-    Variant function(string) converter;
+    Variant function(string, Config) converter;
 
     private static Variant MISSING;
 
@@ -2770,7 +2831,7 @@ class Config {
     }
 
     Variant convertString(string s) {
-        Variant result = converter(s);
+        Variant result = converter(s, this);
 
         if ((result == s) && strictConversions) {
             throw new ConfigException(format!"unable to convert '%s'"(s));
