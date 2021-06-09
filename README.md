@@ -47,7 +47,7 @@ D> import config;
 config
 D> Config cfg; shared static this() { cfg = null; }
 cfg
-D> cfg = new Config("tmp/test0.cfg")
+D> cfg = new Config("test0.cfg")
 Config(test0.cfg)
 ```
 The one-time-per-session dance with `shared static this()` is currently needed due to a limitation of `drepl`.

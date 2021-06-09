@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Red Dove Consultants Limited.
+ * Copyright (c) 2018-2021, Red Dove Consultants Limited.
  *
  * See LICENSE file for license terms.
  */
@@ -496,7 +496,7 @@ class Tokenizer {
     }
 
     public void pushBack(dchar c) {
-        if ((c != '\0') && ((c == '\n') || !std.uni.isWhite(c))) {
+        if (c != '\0') {
             pushedBack ~= new PushBackInfo(c, charLocation);
         }
     }
@@ -1370,6 +1370,12 @@ class Parser {
                 if ((kind == TokenKind.Newline) || (kind == TokenKind.Comma)) {
                     advance();
                     kind = consumeNewlines();
+                }
+                else if ((kind != TokenKind.RightCurly) && (kind != TokenKind.EOF)) {
+                    auto e = new ParserException(format!"expected '}' or EOF, found: %s"(kind));
+
+                    e.location = next.start;
+                    throw e;
                 }
             }
         }
@@ -2470,8 +2476,14 @@ bool isIdentifier(string s) {
 
 ASTNode parsePath(string s) {
     auto r = inputRangeObject(s.representation.map!(b => ubyte(b)));
-    auto parser = new Parser(r);
+    Parser parser;
 
+    try {
+        parser = new Parser(r);
+    }
+    catch (RecognizerException e) {
+        throw new InvalidPathException(format!"Invalid path: %s"(s));
+    }
     if (parser.next.kind != TokenKind.Word) {
         throw new InvalidPathException(format!"Invalid path: %s"(s));
     }
