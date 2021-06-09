@@ -2560,11 +2560,12 @@ Variant defaultStringConverter(string s) {
                 result = SysTime(dt, dur);
             }
             else {
+                int sign = (c[13] == "-") ? -1 : 1;
                 int ohour = to!int(c[14]);
                 int ominute = to!int(c[15]);
                 int osecond = (c[17].length > 0) ? to!int(c[17]) : 0;
 
-                auto dur = minutes(ominute + ohour * 60);
+                auto dur = minutes(sign * (ominute + ohour * 60));
                 auto tz = new SimpleTimeZone(dur);
                 dur = nsecs(nanos);
                 auto dt = DateTime(year, month, day, hour, minute, second);
