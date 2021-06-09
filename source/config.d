@@ -1839,23 +1839,35 @@ class Evaluator {
     }
 
     Variant evalAt(UnaryNode node) {
-        auto fn = evaluate(node.operand).peek!(string);
+        auto v = evaluate(node.operand);
+        auto fn = v.peek!(string);
         Variant result = null;
+        string p;
 
         if (fn is null) {
             throw new ConfigException("@ operand must be a string");
         }
+        else {
+            p = *fn;
+        }
+
         auto found = false;
-        auto p = buildPath(config.rootDir, *fn);
-        if (exists(p)) {
+
+        if (isAbsolute(p) && exists(p)) {
             found = true;
         }
         else {
-            foreach (d; config.includePath) {
-                p = buildPath(d, *fn);
-                if (exists(p)) {
-                    found = true;
-                    break;
+            p = buildPath(config.rootDir, *fn);
+            if (exists(p)) {
+                found = true;
+            }
+            else {
+                foreach (d; config.includePath) {
+                    p = buildPath(d, *fn);
+                    if (exists(p)) {
+                        found = true;
+                        break;
+                    }
                 }
             }
         }
@@ -1875,6 +1887,7 @@ class Evaluator {
             cfg.context = config.context;
             cfg.cached = config.cached;
             cfg.parent = config;
+            cfg.includePath = config.includePath.dup;
             cfg.data = cfg.wrapMapping(mn);
             cfg.setPath(p);
             result = cfg;
