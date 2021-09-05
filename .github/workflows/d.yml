@@ -1,0 +1,33 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+name: D
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: dlang-community/setup-dlang@4c99aa991ce7d19dd3064de0a4f2f6b2f152e2d7
+    - name: Run tests on Windows after setting HOME environment variable
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        $env:HOME = $env:HOMEPATH
+        echo "Set HOME to $HOME"
+        dub run --compiler=$DC
+    - name: Run tests on POSIX
+      if: ${{ matrix.os != 'windows-latest' }}
+      run: |
+        dub run --compiler=$DC
