@@ -734,11 +734,15 @@ class Tokenizer {
                     pushBack(c);
                 }
                 kind = TokenKind.Newline;
-                location.nextLine();
+                end.update(location);
+                end.column--;
                 break;
             }
             else if (c == '\\') {
                 c = getChar();
+                if (c == '\r') {
+                    c = getChar();
+                }
                 if (c != '\n') {
                     auto e = new TokenizerException(format!"unexpected character: \\");
 

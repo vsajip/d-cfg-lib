@@ -21,7 +21,8 @@
       "name": "library",
       "targetType": "staticLibrary",
       "targetName": "cfg",
-      "sourceFiles": ["source/config.d"]
+      "sourceFiles": ["source/config.d"],
+      "excludedSourceFiles": [ "source/app.d", "source/tests.d" ]
     }
   ]
 }
