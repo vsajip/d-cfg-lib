@@ -4,6 +4,6 @@ module app;
 
 import dunit;
 
-void main(string[] args) {
-    dunit_main(args);
+int main(string[] args) {
+    return dunit_main(args);
 }
