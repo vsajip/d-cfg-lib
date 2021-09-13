@@ -1,11 +1,11 @@
 {
   "name": "cfg-lib",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "authors": [ "Vinay Sajip <vinay_sajip@yahoo.co.uk>" ],
   "description": "Library for working with the CFG configuration format",
   "license": "3-Clause BSD",
   "homepage": "https://docs.red-dove.com/cfg/index.html",
-  "copyright": "Copyright (C) 2019 Red Dove Consultants Ltd.",
+  "copyright": "Copyright (C) 2019-2021 Red Dove Consultants Ltd.",
   "configurations": [
     {
       "name": "tests",
