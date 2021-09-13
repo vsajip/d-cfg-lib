@@ -2,7 +2,7 @@
 
 All notable changes for the new implementation should be documented in this file.
 
-## 0.1.1 - 2021-09-14
+## 0.1.1 - 2021-09-13
 
 ### Added
 * [`c0a707d`](https://github.com/vsajip/dotnet-cfg-lib/commit/c0a707d)
