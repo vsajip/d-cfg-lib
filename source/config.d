@@ -1848,8 +1848,8 @@ string stringFor(Variant v) {
     else if (isDict(v)) {
         string[] parts = [];
 
-        foreach (k, v; v.get!(Variant[string])) {
-            parts ~= format!"%s: %s"(k, stringFor(v));
+        foreach (k, val; v.get!(Variant[string])) {
+            parts ~= format!"%s: %s"(k, stringFor(val));
         }
         result = format!"{%s}"(parts.join(", "));
     }
