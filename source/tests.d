@@ -1375,4 +1375,13 @@ class ConfigTests : BaseTest {
         cfg.includePath ~= dataFilePath("another");
         assertEquals(42, cfg["level1.level2.final"].get!(long));
     }
+
+    @Test
+    public void recursiveConfiguration() {
+        auto path = dataFilePath("derived", "recurse.cfg");
+        auto cfg = new Config(path);
+
+        auto e = expectThrows!ConfigException(cfg["recurse"]);
+        assertEquals(e.message, "configuration cannot include itself: recurse.cfg");
+    }
 }

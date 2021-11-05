@@ -1553,7 +1553,7 @@ class Parser {
     ASTNode comparison() {
         auto result = bitorExpr();
 
-        while (next.kind in comparisonOperators) {
+        if (next.kind in comparisonOperators) {
             result = new BinaryNode(compOp(), result, bitorExpr());
         }
         return result;
@@ -1902,6 +1902,10 @@ class Evaluator {
         }
         if (!found) {
             throw new ConfigException(format!"unable to locate %s"(fn));
+        }
+        if (filenameCmp(config.path, p) == 0) {
+            auto bn = baseName(p);
+            throw new ConfigException(format!"configuration cannot include itself: %s"(bn));
         }
         auto f = File(p);
         auto r = inputRangeObject(f.byChunk(8192).joiner);
