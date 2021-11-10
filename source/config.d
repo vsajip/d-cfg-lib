@@ -418,7 +418,8 @@ class Tokenizer {
             '&': TokenKind.BitwiseAnd,
             '|': TokenKind.BitwiseOr,
             '^': TokenKind.BitwiseXor,
-            '.': TokenKind.Dot
+            '.': TokenKind.Dot,
+            '=': TokenKind.Assign
         ];
 
         keywords = [
@@ -772,19 +773,6 @@ class Tokenizer {
                 kind = getNumber(text, value, start, end);
                 break;
             }
-            else if (c == '=') {
-                c = getChar();
-
-                if (c != '=') {
-                    kind = TokenKind.Assign;
-                    pushBack(c);
-                }
-                else {
-                    kind = TokenKind.Equal;
-                    appendChar(c);
-                }
-                break;
-            }
             else if (c in punctuation) {
                 kind = punctuation[c];
                 if (c == '.') {
@@ -805,6 +793,17 @@ class Tokenizer {
                     else {
                         appendChar(c);
                         kind = getNumber(text, value, start, end);
+                    }
+                }
+                else if (c == '=') {
+                    c = getChar();
+
+                    if (c != '=') {
+                        pushBack(c);
+                    }
+                    else {
+                        kind = TokenKind.Equal;
+                        appendChar(c);
                     }
                 }
                 else if (c == '<') {
@@ -932,9 +931,7 @@ class Tokenizer {
 
                     if (c2 != quote) {
                         pushBack(c2);
-                        if (c2 == '\0') {
-                            charLocation.update(c1Loc);
-                        }
+                        charLocation.update(c1Loc);
                         pushBack(c1);
                     }
                     else {
