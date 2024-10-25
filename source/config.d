@@ -1926,7 +1926,8 @@ class Evaluator {
             result = config.wrapList(ln);
         }
         else {
-            result = cnode;
+            // result = cnode;
+            throw new ConfigException(format!"unexpected container type: %s"(cnode));
         }
         return result;
     }
@@ -2691,6 +2692,7 @@ class Config {
     }
 
     this() {
+        rootDir = getcwd();
         includePath = new string[0];
         evaluator = new Evaluator(this);
         converter = &defaultStringConverter;
@@ -2768,11 +2770,6 @@ class Config {
         return result;
     }
 
-    Variant getFromPath(string key) {
-        evaluator.refsSeen.clear();
-        return evaluator.getFromPath(parsePath(key));
-    }
-
     Variant baseGet(string key, Variant defaultValue = MISSING) {
         Variant result = null;
 
@@ -2795,7 +2792,8 @@ class Config {
             else if (!isIdentifier(key)) {
                 // Treat as a path
                 try {
-                    result = getFromPath(key);
+                    evaluator.refsSeen.clear();
+                    result = evaluator.getFromPath(parsePath(key));
                     found = true;
                 }
                 catch (InvalidPathException ipe) {

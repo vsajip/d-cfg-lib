@@ -1357,13 +1357,18 @@ class ConfigTests : BaseTest {
     }
 
     @Test
-    public void absoluteIncludePath() {
-        auto path = absolutePath(dataFilePath("derived", "test.cfg"));
-        auto s = "test: @'foo'".replace("foo", path.replace("\\", "/"));
-        auto r = inputRangeObject(s.representation.map!(b => ubyte(b)));
-        auto cfg = new Config(r);
+    public void includePaths() {
+        auto p1 = dataFilePath("derived", "test.cfg");
+        auto p2 = absolutePath(p1);
+        auto plist = [p1, p2];
 
-        assertEquals(2, cfg["test.computed6"].get!(long));
+        foreach(path; plist) {
+            auto s = "test: @'foo'".replace("foo", path.replace("\\", "/"));
+            auto r = inputRangeObject(s.representation.map!(b => ubyte(b)));
+            auto cfg = new Config(r);
+
+            assertEquals(2, cfg["test.computed6"].get!(long));
+        }
     }
 
     @Test
