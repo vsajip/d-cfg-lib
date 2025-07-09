@@ -2,7 +2,7 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-name: D
+name: Library tests
 
 on:
   push:
@@ -29,8 +29,10 @@ jobs:
       run: |
         $env:HOME = $env:HOMEPATH
         echo "Set HOME to $HOME"
+        dub --version
         dub run
     - name: Run tests on POSIX
       if: ${{ matrix.os != 'windows-latest' }}
       run: |
+        dub --version
         dub run --compiler=$DC
